@@ -1,3 +1,20 @@
+""" Eric Buonocore le 14/01/2023.
+
+    Jeu de dés.
+    Objectif : Faire 10 (mission) avec 3 dés à 6 faces avec le moins de lancés possibles. 
+    On peut relancer un dé à chaque tentative.
+    Le jeu peut se jouer en plusieurs manches.
+    Programmation lisible en NSI Première : Sans Programmation Orientée Objet, sans enumerate.
+    Juste avec la bibliothèque Pygame.
+
+    Game of dice.
+    Objective: Get 10 (mission) with 3 6-sided dice with the fewest rolls possible.
+    You can re-roll a die on each attempt.
+    The game can be played over multiple rounds.
+    Programming accessible in NSI Première: Without Object Oriented Programming, without enumerate.
+    Just with the Pygame library.
+"""
+
 # Library
 import pygame
 from random import randrange
@@ -54,6 +71,7 @@ def screen_update(victory=None):
         scores list format : [total_score_player1, total_score_player2, rolls_player1, rolls_player2]
         if victory is not None, print the name of the winner. (victory = 1 for player 1)
     """
+    # Draw the scoreboard
     text = base_font.render("Manches gagnées", 0, (10, 10, 10))
     textpos = text.get_rect(center=(WIDTH//4, 10))
     surface_up_header.blit(text, textpos)
@@ -65,19 +83,19 @@ def screen_update(victory=None):
     text = base_font.render("Joueur 2", 0, (10, 10, 10))
     textpos = text.get_rect(centerx=3*WIDTH//8, centery=10)
     surface_up.blit(text, textpos)
-    # Total score of player1
+    # Player 1 total scores
     text = base_font.render(str(scores[0]), 0, (10, 10, 10))
     textpos = text.get_rect(centerx=WIDTH//8, centery=30)
     surface_up.blit(text, textpos)
-    # Total score of player2
+    # Player 1 total scores
     text = base_font.render(str(scores[1]), 0, (10, 10, 10))
     textpos = text.get_rect(centerx=3*WIDTH//8, centery=30)
     surface_up.blit(text, textpos)
     screen.blit(surface_up, (WIDTH//4, 40))
-
     pygame.draw.rect(screen, COLOR_LINE, pygame.Rect(
         WIDTH//4, 40, WIDTH//2, 40),  2)
 
+    # Draw the table of the number of dice rolls
     text = base_font.render(
         "Partie en cours : Nombre de lancés", 0, (10, 10, 10))
     textpos = text.get_rect(center=(WIDTH//4, 10))
@@ -90,14 +108,14 @@ def screen_update(victory=None):
     text = base_font.render("Joueur 2", 0, (10, 10, 10))
     textpos = text.get_rect(centerx=3*WIDTH/8, centery=10)
     surface_down.blit(text, textpos)
-    # number of player1's rolls
+    # Number of player 1 dice rolls
     dice = ""
     if player_turn == 1:
         dice = '► '
     text = base_font.render(dice + str(scores[2]), 0, (10, 10, 10))
     textpos = text.get_rect(centerx=WIDTH/8, centery=30)
     surface_down.blit(text, textpos)
-    # number of player2's rolls
+    # Number of player 2 dice rolls
     dice = ""
     if player_turn == 2:
         dice = '► '
@@ -105,13 +123,16 @@ def screen_update(victory=None):
     textpos = text.get_rect(centerx=3*WIDTH/8, centery=30)
     surface_down.blit(text, textpos)
     screen.blit(surface_down, (WIDTH//4, 720))
-
     pygame.draw.rect(screen, COLOR_LINE, pygame.Rect(
         WIDTH//4, 720, WIDTH//2, 40),  2)
 
+    # Draw the playing surface
     screen.blit(bck_ground, bckpos)
 
-    for dice_index, dice_value in enumerate(dice_values):
+    # Draw the dices
+    dice_index = -1
+    for dice_value in dice_values:
+        dice_index += 1
         if dice_value != 0:
             dice_image = dices_images[dice_value-1]
             pos = (WIDTH//2, HEIGHT//2)
@@ -119,22 +140,25 @@ def screen_update(victory=None):
             offset = (dice_index-1)*120
             screen.blit(dice_image, (pos[0]+offset -
                         dice_dim[2]//2, pos[1]-dice_dim[3]//2))
+
+    # Print an alert in case of victory
     if victory is not None:
-        text = "Le joueur " + str(victory) + "\ngagne cette manche."
+        surface_alert_victory.fill(COLOR_ALERT)
+        text = "Le joueur " + str(victory) + " gagne cette manche."
         text = base_font.render(text, 1, (200, 10, 10))
-        textpos = text.get_rect(center=(WIDTH//8, 20))
+        textpos = text.get_rect(center=(WIDTH//4, 20))
         surface_alert_victory.blit(text, textpos)
         surfpos = surface_alert_victory.get_rect(
-            center=((WIDTH//2, 3*HEIGHT/4)))
+            center=((WIDTH//2, 3*HEIGHT//5)))
         screen.blit(surface_alert_victory, surfpos)
         pygame.display.flip()
         time.sleep(2)
         screen_update()
     pygame.display.flip()
-    # pygame.display.update()
 
 
 # Main
+# Initialization & load the assets
 pygame.init()
 base_font = pygame.font.Font("assets/LiberationMono-Regular.ttf", 16)
 screen = pygame.display.set_mode((HEIGHT, WIDTH))
@@ -151,6 +175,7 @@ for i in range(1, 7):
     dice_name = "assets/dice_" + str(i) + ".png"
     dices_images.append(pygame.image.load(dice_name).convert())
 
+# Initialize the surfaces
 surface_up_header = pygame.Surface((WIDTH//2, 20))
 surface_up_header = surface_up_header.convert()
 surface_up_header.fill(COLOR_LINE)
@@ -165,10 +190,11 @@ surface_down = pygame.Surface((WIDTH//2, 40))
 surface_down = surface_up.convert()
 surface_down.fill(COLOR_MAT)
 
-surface_alert_victory = pygame.Surface((WIDTH//4, 60))
+surface_alert_victory = pygame.Surface((WIDTH//2, 60))
 surface_alert_victory = surface_alert_victory.convert()
 surface_alert_victory.fill(COLOR_ALERT)
 
+# Initialize the counters
 total_score_player1 = 0
 total_score_player2 = 0
 rolls_player1 = 0
@@ -179,8 +205,10 @@ player_turn = 2
 dice_values = [mission, 0, 0]
 dice_choice = None
 
+# Main loop
 play = True
 while play:
+    # Analyze the keyboard and mouse events
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             play = False
@@ -192,9 +220,11 @@ while play:
         time.sleep(2)
         if player_turn == 2:
             if scores[2] > scores[3]:
+                # Player 2 wins
                 scores[1] += 1
                 screen_update(2)
             elif scores[2] < scores[3]:
+                # Player 1 wins
                 scores[0] += 1
                 screen_update(1)
             scores[2] = 0
